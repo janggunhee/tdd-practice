@@ -1,13 +1,12 @@
 
-import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
+from django.test import LiveServerTestCase
 
 
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
 
 
     def setUp(self):
@@ -65,9 +64,5 @@ class NewVisitorTest(unittest.TestCase):
         # 해당 URL에 접속하면 그녀가 만든 작업 목록이 그대로 있는 것을 확인할 수 있다
 
         # 만족하고 잠자리에 든다.
-
-
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
 
 
