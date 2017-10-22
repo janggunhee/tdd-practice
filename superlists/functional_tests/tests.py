@@ -45,6 +45,8 @@ class NewVisitorTest(LiveServerTestCase):
         # 엔터키를 치면 페이지가 갱신되고 작업 목록에
         # "1: 공작깃털 사기" 아이템이 추가된다
         inputbox.send_keys(Keys.ENTER)
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
         self.check_for_row_in_list_table('1: Buy peacock feathers')
 
         # 추가 아이템을 입력할 수 있는 여분의 텍스트 상자가 존재한다.
@@ -54,15 +56,38 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox.send_keys(Keys.ENTER)
 
         # 페이지는 다시 갱신되고, 두 개 아이템이 목록에 보인다.
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
 
-        # 에디스는 사이트가 입력한 목록을 저장하고 있는지 궁금하다
-        # 사이트는 그녀를 위한 특정 URL을 생성해 준다
-        # 이때 URL에 대한 설명도 함께 제공된다
-        self.fail('Finish the test!')
-        # 해당 URL에 접속하면 그녀가 만든 작업 목록이 그대로 있는 것을 확인할 수 있다
+        # Now a new user, Francis, comes along to the site.
 
-        # 만족하고 잠자리에 든다.
+        ## We use a new browser session to make sure that no information
+        ## of Edith's is coming through from cookies etc #1
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
 
+        # Francis visits the home page.  There is no sign of Edith's
+        # list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+
+        # Francis starts a new list by entering a new item. He
+        # is less interesting than Edith...
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+
+        # Francis gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # Again, there is no trace of Edith's list
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
+
+        # Satisfied, they both go back to sleep
 
